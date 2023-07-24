@@ -1,94 +1,92 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-cron: 21 6 * * *
-new Env('吾爱破解');
+File: 52pojie.py
+Author: WFRobert
+Date: 2023/3/9 15:01
+cron: 6 14 9 * * ?
+new Env('52pojie自动签到脚本');
+Description: 52pojie自动签到,实现每日自动签到52pojie
+Update: 2023/3/9 更新cron
 """
-
-import requests, sys, re, traceback
-from io import StringIO
+import logging
+import os
+import sys
+import urllib.parse
+import requests
 from bs4 import BeautifulSoup
-from KDconfig import getYmlConfig, send
+from init_logger import init_logger
+import notify
 
-class W2PJ:
-    def __init__(self, cookie):
-        self.sio = StringIO()
-        self.Cookies = cookie
-        self.cookie = ''
+# 通知内容
+message = []
 
-    # 签到
-    def task(self):
-        session = requests.session()
-        if self.cookie == "":
-            print("请配置Cookie再试试")
-            self.sio.write("请配置Cookie再试试\n")
-            return
-        requests.utils.add_dict_to_cookiejar(session.cookies, {item.split("=")[0]: item.split("=")[1] for item in self.cookie.split("; ")})
-        session.headers.update({"Referer": "https://www.52pojie.cn/home.php?mod=task&do=draw&id=2&referer=%2F"})
-        session.headers.update({"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.135 Safari/537.36"})
-        res = session.get(url="https://www.52pojie.cn/home.php?mod=task&do=apply&id=2&referer=%2F")
-        p1 = re.findall('\|\/(.*=)\|', res.text)[0]
-        resp = session.get(url=f"https://www.52pojie.cn/{p1}?wzwscspd=MC4wLjAuMA==")
-        # resp = session.get(f"https://www.52pojie.cn/home.php?mod=task&do=apply&id=2&referer=%2F")
-        soup = BeautifulSoup(resp.text, "html.parser")
-        content = soup.select("#messagetext>p")
-        soup = BeautifulSoup(resp.text, "html.parser")
-        if len(content) == 0:
-            print('出现了问题')
-        else:
-            print(content[0].get_text())
-        if '恭喜' in resp.text:
-            self.sio.write('签到成功')
-            self.getCB()
-        elif '已申请过此任务' in resp.text or '不是进行中的任务' in resp.text:
-            self.sio.write('重复签到')
-            self.getCB()
-        else:
-            print(resp.text[1500:2000])
-            self.sio.write('Cookie失效\n')
+# 初始化日志系统
+init_logger()
 
-    # 获取 CB
-    def getCB(self):
-        url = 'https://www.52pojie.cn/home.php?mod=spacecp&ac=credit&showcredit=1&inajax=1&ajaxtarget=extcreditmenu_menu'
-        headers = {
-            "Referer": "https://www.52pojie.cn",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36",
-            "Cookie": self.cookie
-        }
-        res = requests.get(url=url, headers=headers)
-        cb = re.findall('吾爱币: <span id="hcredit_2">(.*)</span></li><li> 贡献值', res.text)[0]
-        print(f'剩余{cb}')
-        self.sio.write(f', 剩余{cb}\n')
-
-    def SignIn(self):
-        print("【吾爱破解 日志】")
-        self.sio.write("【吾爱破解】\n")
-        for cookie in self.Cookies:
-            cookie = cookie.get("user")
-            self.cookie = cookie.get("cookie")
-            print(f"{cookie.get('name')} 开始签到...")
-            self.sio.write(f"{cookie.get('name')}: ")
-            try:
-                self.task()
-            except:
-                print(f"{cookie.get('name')}: 异常 {traceback.format_exc()}\n")
-                if '签到存在异常, 请自行查看签到日志' not in self.sio.getvalue():
-                    self.sio.write('签到存在异常, 请自行查看签到日志\n')
-        return self.sio
-
-if __name__ == '__main__':
-    config = getYmlConfig('Cookie.yml')
-    Cookies = config.get('W2PJ')
-    if Cookies != None:
-        if Cookies.get('cookies') != None:
-            w2pj = W2PJ(Cookies['cookies'])
-            sio = w2pj.SignIn()
-            print(f'\n{sio.getvalue()}')
-            if Cookies.get('send') != None and Cookies['send'] == 1:
-                send('吾爱破解', sio.getvalue())
-            else:
-                print('推送失败: 关闭了推送 or send配置问题')
-        else:
-            print('配置文件 吾爱破解 没有 "cookies"')
-            sys.exit()
+# 多cookie使用&分割
+logging.info("开始签到")
+cookies = ""
+if cookies == "":
+    if os.environ.get("PJ52_COOKIE"):
+        cookies = os.environ.get("PJ52_COOKIE")
     else:
-        print('配置文件没有 吾爱破解')
+        logging.info("😢请在环境变量填写PJ52_COOKIE的值")
+        sys.exit()
+n = 1
+for cookie in cookies.split("&"):
+    url1 = "https://www.52pojie.cn/CSPDREL2hvbWUucGhwP21vZD10YXNrJmRvPWRyYXcmaWQ9Mg==?wzwscspd=MC4wLjAuMA=="
+    url2 = 'https://www.52pojie.cn/home.php?mod=task&do=apply&id=2&referer=%2F'
+    url3 = 'https://www.52pojie.cn/home.php?mod=task&do=draw&id=2'
+    cookie = urllib.parse.unquote(cookie)
+    cookie_list = cookie.split(";")
+    cookie = ''
+    for i in cookie_list:
+        key = i.split("=")[0]
+        if "htVC_2132_saltkey" in key:
+            cookie += "htVC_2132_saltkey=" + urllib.parse.quote(i.split("=")[1]) + "; "
+        if "htVC_2132_auth" in key:
+            cookie += "htVC_2132_auth=" + urllib.parse.quote(i.split("=")[1]) + ";"
+    if not ('htVC_2132_saltkey' in cookie or 'htVC_2132_auth' in cookie):
+        logging.error(f"😢第{n}cookie中未包含htVC_2132_saltkey或htVC_2132_auth字段，请检查cookie")
+        message.append(f"😢第{n}cookie中未包含htVC_2132_saltkey或htVC_2132_auth字段，请检查cookie")
+        sys.exit()
+    headers = {
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,"
+                  "application/signed-exchange;v=b3;q=0.9",
+        "Accept-Encoding": "gzip, deflate, br",
+        "Accept-Language": "zh-CN,zh;q=0.9",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+        "Cookie": cookie,
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
+                      "Chrome/109.0.0.0 Safari/537.36",
+    }
+    r = requests.get(url1, headers=headers, allow_redirects=False)
+    s_cookie = r.headers['Set-Cookie']
+    cookie = cookie + s_cookie
+    headers['Cookie'] = cookie
+    r = requests.get(url2, headers=headers, allow_redirects=False)
+    s_cookie = r.headers['Set-Cookie']
+    cookie = cookie + s_cookie
+    headers['Cookie'] = cookie
+    r = requests.get(url3, headers=headers)
+    r_data = BeautifulSoup(r.text, "html.parser")
+    jx_data = r_data.find("div", id="messagetext").find("p").text
+    if "您需要先登录才能继续本操作" in jx_data:
+        logging.error(f"第😢{n}个账号Cookie 失效")
+        message.append(f"第😢{n}个账号Cookie 失效\n")
+    elif "恭喜" in jx_data:
+        logging.info(f"😊第{n}个账号签到成功")
+        message.append(f"😊第{n}个账号签到成功\n")
+    elif "不是进行中的任务" in jx_data:
+        logging.info(f"😊第{n}个账号今日已签到")
+        message.append(f"😊第{n}个账号今日已签到\n")
+    else:
+        logging.info(f"😢第{n}个账号签到失败")
+        message.append(f"😢第{n}个账号签到失败\n")
+    n += 1
+
+# 发送通知
+msg = '\n'.join(message)
+notify.send("吾爱破解签到", msg)

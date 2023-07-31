@@ -185,7 +185,7 @@ W2PJ:
         - user:
             name: ''
             # htVC_2132_saltkey, htVC_2132_auth
-            cookie: ''
+            cookie: 'KF4=V08LsL; wzws_sessionid=gDExMi4yMC4xNDAuMjQ2oGTH2JCCZGIxY2FhgWI5MWM5Mw==; Hm_lvt_46d556462595ed05e05f009cdafff31a=1689969176,1690131271,1690231537,1690818706; htVC_2132_seccodecSAJ0N=3246953.749d4ea8fb9b732ffc; htVC_2132_seccodecSAJ0NYl9=3246957.46c008eb418df63e9e; htVC_2132_saltkey=A4e75a38; htVC_2132_lastvisit=1690813013; htVC_2132_con_request_uri=https%3A%2F%2Fwww.52pojie.cn%2Fconnect.php%3Fmod%3Dlogin%26op%3Dcallback%26referer%3Dindex.php; htVC_2132_client_created=1690820149; htVC_2132_client_token=6A3DAF74D6E7A9313BEF211312C47477; htVC_2132_ulastactivity=1690820149%7C0; htVC_2132_auth=7b498jls9WwPrEUGlzcCp2JiY8DwCLGI696nqZ3oHzRIzL%2BeizUkiMZpGisQFuuq0911F9%2FUe1IPAuMMY8cSq0qd8hbM; htVC_2132_connect_login=1; htVC_2132_connect_is_bind=1; htVC_2132_connect_uin=6A3DAF74D6E7A9313BEF211312C47477; htVC_2132_stats_qc_login=3; htVC_2132_sid=0; htVC_2132_lastcheckfeed=1929882%7C1690820150; htVC_2132_checkfollow=1; htVC_2132_checkpm=1; htVC_2132_nofavfid=1; htVC_2132_noticonf=1929882D1D3_3_1; Hm_lpvt_46d556462595ed05e05f009cdafff31a=1690820158; htVC_2132_lastact=1690820154%09plugin.php%09'
 
 # 天气预报
 Weather:

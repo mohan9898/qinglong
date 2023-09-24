@@ -67,7 +67,7 @@ for cookie in cookies.split("&"):
     headers['Cookie'] = cookie
     r = requests.get(url3, headers=headers)
     r_data = BeautifulSoup(r.text, "html.parser")
-    jx_data = r_data.find("div", id="messagetext").find("p").text
+    jx_data = r_data.find("div", id="messagetext ").find("p").text
     if "您需要先登录才能继续本操作" in jx_data:
         initialize.error_message(f"第{n}个账号Cookie 失效\n")
     elif "恭喜" in jx_data:

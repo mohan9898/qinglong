@@ -28,8 +28,8 @@ B64MAP = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 # 使用了开源项目https://www.52pojie.cn/forum.php?mod=viewthread&tid=1784111&highlight=%CC%EC%D2%ED%D4%C6%C5%CC
 class TianYiYunPan:
     def __init__(self, user) -> None:
-        self.username = user['18752573514']
-        self.password = user['si3321,.']
+        self.username = user['username']
+        self.password = user['password']
 
     def int2char(self, a):
         return BI_RM[a]

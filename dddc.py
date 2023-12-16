@@ -35,6 +35,10 @@ guafen3 = 'https://ut.xiaojukeji.com/ut/welfare/api/action/event/report'
 ttfuli = 'https://ut.xiaojukeji.com/ut/janitor/api/home/sign/index'
 ttfuli1 = 'https://ut.xiaojukeji.com/ut/janitor/api/action/sign/do'
 yao = 'https://api.didi.cn/webx/chapter/product/init'
+#查询未领取福利金
+fulijingchax = 'https://ut.xiaojukeji.com/ut/welfare/api/home/getBubble'
+#接上面领取
+liqu = 'https://ut.xiaojukeji.com/ut/welfare/api/action/clickBubble'
 
 def main(uid,token):
     print(f'正在执行账号：{uid}')
@@ -49,13 +53,16 @@ def main(uid,token):
 def diyi(uid,token):
     print('--------领取优惠券--------')
     yq(uid,token)
-    data = {"lang":"zh-CN","token":token,"access_key_id":9,"appversion":appversion,"channel":1100000009,"_ds":"","xpsid":"d04ccc4ce0c844e38c164ecc30711458","xpsid_root":"d04ccc4ce0c844e38c164ecc30711458","dsi":"877e066d7ce22ef07762fa42992227567393hvn1","source_id":"31806556232355840DT124787708487929856DT","product_type":"didi","city_id":33,"lng":"","lat":"","source_.from":"","env":{"dchn":"r2mda3z","newTicket":token,"latitude":"","longitude":"","model":"2201122C","fromChannel":"2","newAppid":"35009","openId":"","openIdType":"1","sceneId":"1037","isHitButton":True,"isOpenWeb":False,"timeCost":19908,"cityId":"33","xAxes":"167.60003662109375","yAxes":"480.0857849121094"},"req_env":"wx","dunion_callback":""}
+    #data = {"lang":"zh-CN","token":token,"access_key_id":9,"appversion":appversion,"channel":1100000009,"_ds":"","xpsid":"d04ccc4ce0c844e38c164ecc30711458","xpsid_root":"d04ccc4ce0c844e38c164ecc30711458","dsi":"877e066d7ce22ef07762fa42992227567393hvn1","source_id":"31806556232355840DT124787708487929856DT","product_type":"didi","city_id":33,"lng":"","lat":"","source_.from":"","env":{"dchn":"r2mda3z","newTicket":token,"latitude":"","longitude":"","model":"2201122C","fromChannel":"2","newAppid":"35009","openId":"","openIdType":"1","sceneId":"1037","isHitButton":True,"isOpenWeb":False,"timeCost":19908,"cityId":"33","xAxes":"167.60003662109375","yAxes":"480.0857849121094"},"req_env":"wx","dunion_callback":""}
+    data = {"xbiz":"240101","prod_key":"ut-dunion-wyc","xpsid":"6dc1173059e04e57ab5c51689827af8c","dchn":"Qm0wKR1","xoid":"c5f5aeb5-19a4-4e60-9305-d45c37e48a27","xenv":"wxmp","xspm_from":"none.none.none.none","xpsid_root":"6dc1173059e04e57ab5c51689827af8c","xpsid_from":"","xpsid_share":"","env":{"dchn":"Qm0wKR1","newTicket":token,"cityId":"33","userAgent":"","fromChannel":"2","newAppid":"30012","openId":"","openIdType":"1","isHitButton":False,"isOpenWeb":True,"timeCost":4667},"req_env":"wx","dsi":"e674ac10376e717aeac76c7510243b76410u18sh","source_id":"4a871f6eb9e4ee5568f0","product_type":"didi","lng":"","lat":"","token":token,"uid":281475120025923,"phone":"","city_id":33,"source_from":""}
     tijiao = requests.post(url=youhui, json=data).json()
     if tijiao['errmsg'] == 'success':
         for yh in tijiao['data']['rewards']:
             print(f"获取到{yh['coupon']['max_benefit_capacity']['value']}{yh['coupon']['max_benefit_capacity']['unit']} {yh['coupon']['name']} {yh['coupon']['remark']}")
     else:
         print(tijiao['errmsg'])
+
+    didiyouc(uid,token)
     print('--------福利中心签到------')
     data = {
     'lang' : 'zh-CN',
@@ -77,6 +84,10 @@ def diyi(uid,token):
     else:
         print(tijiao['errmsg'])
         
+    try:
+        fuliwei(uid,token)
+    except Exception as e:
+        print('小错误')
     print('--------天天领券签到------')
     headers = {'didi-ticket': token,'content-type':'application/json'}
     data = {
@@ -257,10 +268,78 @@ def guafen(uid,token):
 def chaxun(uid,token):
     print('--------福利金查询--------')
     cx = requests.get(url=f'https://rewards.xiaojukeji.com/loyalty_credit/bonus/getWelfareUsage4Wallet?token={token}&city_id=0').json()
-    if 'ok' == cx['errmsg']:
+    if '成功' == cx['errmsg']:
         print(f"账号{uid}现在有福利金：{cx['data']['worth']}（可抵扣{cx['data']['worth']/100}元）\n{cx['data']['recent_expire_time']}过期福利金：{cx['data']['recent_expire_amount']}")
     else:
         print('查询失败')
+
+def fuliwei(uid,token):
+    print('--------福利中心未领取查询------')
+    data = {
+    'xbiz' : 240000,
+    'prod_key': 'welfare-center',
+    'xpsid':'8eff1f6aa77a4f278d037f07f3634b35',
+    'dchn' : 'QXeobao',
+    'xoid':'4H3h1CefQlCEYWkpT4dzmg',
+    'xenv' : 'passenger',
+    'xpsid_root' : '73f433de772c402cc346621b3b5f86c5',
+    'xpsid_from':'',
+    'xpsid_share':'',
+    'token' : token,
+    'access_key_id' : 9,
+    'lat' : lat,
+    'lng' : lng,
+    'platform' : 'na',
+    'env' : r'{\"cityId\":\"33\",\"token\":\"\",\"longitude\":\"\",\"latitude\":\"\",\"appid\":\"30004\",\"fromChannel\":\"1\",\"deviceId\":\"\",\"ddfp\":\"\",\"appVersion\":\"6.7.4\",\"userAgent\":\"Mozilla/5.0 (Linux; Android 14; 2201122C Build/UKQ1.230804.001; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/117.0.0.0 Mobile Safari/537.36 didi.passenger/6.7.4 FusionKit/2.0.0  OffMode/0\"}'
+    }
+    #print(data)
+    tijiao = requests.post(url=fulijingchax, json=data).json()
+    print(f"存在{len(tijiao['data']['bubble_list'])}个未领取")
+    if len(tijiao['data']['bubble_list']) > 0:
+        print('进行领取')
+        for lin in tijiao['data']['bubble_list']:
+            data = {
+            'xbiz' : 240000,
+            'prod_key': 'welfare-center',
+            'xpsid':'8eff1f6aa77a4f278d037f07f3634b35',
+            'dchn' : 'QXeobao',
+            'xoid':'4H3h1CefQlCEYWkpT4dzmg',
+            'xenv' : 'passenger',
+            'xpsid_root' : '73f433de772c402cc346621b3b5f86c5',
+            'xpsid_from':'',
+            'xpsid_share':'',
+            'token' : token,
+            'lat' : lat,
+            'lng' : lng,
+            'platform' : 'na',
+            'env' : r'{\"cityId\":\"33\",\"token\":\"\",\"longitude\":\"\",\"latitude\":\"\",\"appid\":\"30004\",\"fromChannel\":\"1\",\"deviceId\":\"\",\"ddfp\":\"\",\"appVersion\":\"6.7.4\",\"userAgent\":\"Mozilla/5.0 (Linux; Android 14; 2201122C Build/UKQ1.230804.001; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/117.0.0.0 Mobile Safari/537.36 didi.passenger/6.7.4 FusionKit/2.0.0  OffMode/0\"}',
+            'cycle_id' : lin['cycle_id'],
+            'bubble_type' : 'yangliu_sign'}
+            tijiao1 = requests.post(url=liqu, json=data).json()
+            if tijiao1['errmsg'] == 'success':
+                print(f"领取{tijiao1['errmsg']}")
+            else:
+                print('领取失败')
+
+
+def didiyouc(uid,token):
+    print('--------领取代驾、洗车优惠券--------')
+    data = {"lang":"zh-CN","token":token,"access_key_id":9,"appversion":appversion,"channel":1100000009,"_ds":"","xpsid":"d590d5aec0884e1e8b56ee04b1b3122e","xpsid_root":"d590d5aec0884e1e8b56ee04b1b3122e","dsi":"80dda490be5cfc6506bf4cbf7b01aa36410odlfg","source_id":"b08d62bd22133278c810","product_type":"didi","dchn":"DZdQqlE","city_id":33,"lng":lng,"lat":lat,"env":{"dchn":"DZdQqlE","newTicket":token,"latitude":lat,"longitude":lng,"model":"2201122C","fromChannel":"2","newAppid":"35009","openId":"","openIdType":"1","sceneId":"1037","isHitButton":True,"isOpenWeb":False,"timeCost":6851,"cityId":"33","xAxes":"275.02850341796875","yAxes":"387.0284729003906"},"req_env":"wx","dunion_callback":""}
+    tijiao = requests.post(url=youhui, json=data).json()
+    if tijiao['errmsg'] == 'success':
+        for yh in tijiao['data']['rewards']:
+            print(f"获取到{yh['coupon']['max_benefit_capacity']['value']}{yh['coupon']['max_benefit_capacity']['unit']} {yh['coupon']['name']} {yh['coupon']['remark']}")
+    else:
+        print(tijiao['errmsg'])
+    print('--------------')
+    data = {"xbiz":"240101","prod_key":"ut-dunion-dj","xpsid":"8c6b4325867d42198a2fe78c5b037475","dchn":"aqj1Xk5","xoid":"c5f5aeb5-19a4-4e60-9305-d45c37e48a27","xenv":"wxmp","xspm_from":"none.none.none.none","xpsid_root":"8c6b4325867d42198a2fe78c5b037475","xpsid_from":"","xpsid_share":"","dsi":"622554f9d87e57040413526a116ac629410nk8lu","source_id":"b08d62bd22133278c810","product_type":"didi","token":token,"city_id":33,"env":{"dchn":"aqj1Xk5","newTicket":token,"userAgent":"","fromChannel":"2","newAppid":"30012","openId":"","openIdType":"1","isHitButton":True,"isOpenWeb":True,"timeCost":13722,"cityId":"33","xAxes":"260.6571044921875","yAxes":"455.3142395019531"},"req_env":"wx","dunion_callback":""}
+    tijiao = requests.post(url=youhui, json=data).json()
+    if tijiao['errmsg'] == 'success':
+        for yh in tijiao['data']['rewards']:
+            print(f"获取到{yh['coupon']['max_benefit_capacity']['value']}{yh['coupon']['max_benefit_capacity']['unit']} {yh['coupon']['name']} {yh['coupon']['remark']}")
+    else:
+        print(tijiao['errmsg'])
+
 
 def yq(uid,token):
     headers = {'content-type':'application/json'}
@@ -270,7 +349,6 @@ def yq(uid,token):
 if __name__ == '__main__':
     uid = 1
     token = ""
-    
     if 'ddgyToken' in os.environ:
         fen = os.environ.get("ddgyToken").split("@")
         print(f'查找到{len(fen)}个账号')
@@ -281,7 +359,7 @@ if __name__ == '__main__':
                 main(uid,token)
                 print('============📣结束📣============')
             except Exception as e:
-                raise e
+                print('小错误')
     else:
         print('不存在青龙变量，本地运行')
         if uid == '' or token == '':
@@ -291,4 +369,4 @@ if __name__ == '__main__':
             try:
                 main(uid,token)
             except Exception as e:
-                raise e
+                print('小错误')
